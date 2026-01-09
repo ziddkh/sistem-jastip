@@ -49,41 +49,57 @@ $(function () {
 
   table.on("click", ".btn-detail", function () {
     const url = $(this).data("uri");
+    const recipientNameElement = $("#recipientName");
+    const createdDateElement = $("#createdDate");
     const totalWeightElement = $("#totalWeight");
     const totalCubicWeightElement = $("#totalCubicWeight");
-    const totalPriceElement = $("#totalPrice");
-    $.get(url, function ({ name, packages }) {
+    const editOrderBtn = $("#editOrderBtn");
+    
+    $.get(url, function ({ id, name, packages, created_at }) {
       $("#detailModal").modal("show");
-      $("#detailModal .modal-title").text(name);
+      recipientNameElement.text(name);
+      
+      // Format the created_at date
+      const date = new Date(created_at);
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      const formattedDate = date.toLocaleDateString('id-ID', options);
+      createdDateElement.text(formattedDate);
+      
+      // Set edit button URL
+      editOrderBtn.attr("href", `/jastip/${id}`);
+      
       let totalWeight = 0;
       let totalCubicWeight = 0;
-      let totalPrice = 0;
       let tdElement = "";
-      packages.map(({ tracking_number, weight, cubic_weight, price }) => {
-        weight = weight.replace(",", ".");
-        cubic_weight = cubic_weight.replace(",", ".");
+      let rowNum = 0;
+      
+      packages.map(({ tracking_number, weight, cubic_weight, length, width, height }) => {
+        rowNum++;
+        weight = weight ? weight.replace(",", ".") : "0";
+        cubic_weight = cubic_weight ? cubic_weight.replace(",", ".") : "0";
         weight = parseFloat(weight);
         cubic_weight = parseFloat(cubic_weight);
         totalWeight += weight;
         totalCubicWeight += cubic_weight;
-        totalPrice += price;
+        
+        const dimensions = `${length || 0} x ${width || 0} x ${height || 0}`;
+        
         tdElement += `<tr>
-                        <td>${tracking_number}</td>
-                        <td>${weight}</td>
-                        <td>${cubic_weight}</td>
-                        <td>Rp. ${formatNumber(price)}</td>
+                        <td>${rowNum}</td>
+                        <td>
+                          <div class="fw-semibold">${tracking_number}</div>
+                        </td>
+                        <td class="text-center">${weight}</td>
+                        <td class="text-center text-primary">${dimensions}</td>
+                        <td class="text-center">${cubic_weight.toFixed(1)}</td>
                       </tr>`;
       });
-      $("#detailModal .modal-body table tbody").html(tdElement);
-      totalWeight =
-        totalWeight % 1 === 0 ? totalWeight : totalWeight.toFixed(2);
-      totalCubicWeight =
-        totalCubicWeight % 1 === 0
-          ? totalCubicWeight
-          : totalCubicWeight.toFixed(2);
+      
+      $("#detailTableBody").html(tdElement);
+      totalWeight = totalWeight % 1 === 0 ? totalWeight : totalWeight.toFixed(1);
+      totalCubicWeight = totalCubicWeight % 1 === 0 ? totalCubicWeight : totalCubicWeight.toFixed(1);
       totalWeightElement.text(totalWeight);
       totalCubicWeightElement.text(totalCubicWeight);
-      totalPriceElement.text(`Rp. ${formatNumber(totalPrice)}`);
     });
   });
 

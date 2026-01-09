@@ -33,17 +33,17 @@
             Data Jastip Diterima
           </h5>
           @if (count($recipients) > 0 && count($packages) > 0)
-            <div class="card-input">
-              <form id="form-send-location">
-                <div class="input-location-group">
-                  <label for="input-send-location">Dikirim Via:</label>
-                  <input id="input-send-location" type="text" class="form-control form-control-sm" name="name">
-                </div>
-                @foreach ($recipients as $recipient)
-                  <input type="hidden" name="recipients[]" value="{{ $recipient->id }}">
-                @endforeach
-              </form>
-            </div>
+          <div class="card-input">
+            <form id="form-send-location">
+              <div class="input-location-group">
+                <label for="input-send-location">Dikirim Via:</label>
+                <input id="input-send-location" type="text" class="form-control form-control-sm" name="name">
+              </div>
+              @foreach ($recipients as $recipient)
+              <input type="hidden" name="recipients[]" value="{{ $recipient->id }}">
+              @endforeach
+            </form>
+          </div>
           @endif
         </div>
         <div class="card-body">
@@ -59,56 +59,53 @@
                   <th>L</th>
                   <th>T</th>
                   <th>KGVOL</th>
-                  <th>Harga</th>
                 </tr>
               </thead>
               <tbody>
                 @if (count($recipients) > 0)
-                  @foreach ($packages as $package)
-                  <tr>
-                      <td>{{ $loop->iteration }}</td>
-                      <td>{{ $package->name }}</td>
-                      <td>{{ $package->tracking_number }}</td>
-                      <td>{{ $package->weight }}</td>
-                      <td>{{ $package->length }}</td>
-                      <td>{{ $package->width }}</td>
-                      <td>{{ $package->height }}</td>
-                      <td>{{ $package->cubic_weight }}</td>
-                      <td>Rp. {{ number_format($package->price, 0, ',', '.') }}</td>
+                @foreach ($packages as $package)
+                <tr>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>{{ $package->name }}</td>
+                  <td>{{ $package->tracking_number }}</td>
+                  <td>{{ $package->weight }}</td>
+                  <td>{{ $package->length }}</td>
+                  <td>{{ $package->width }}</td>
+                  <td>{{ $package->height }}</td>
+                  <td>{{ $package->cubic_weight }}</td>
                   @endforeach
-                @else
-                  <tr>
-                    <td colspan="9" class="text-center">Tidak ada data</td>
-                  </tr>
+                  @else
+                <tr>
+                  <td colspan="9" class="text-center">Tidak ada data</td>
+                </tr>
                 @endif
               </tbody>
               @if (count($recipients) > 0)
-                @php
-                  $totalWeight = 0;
-                  $totalCubicWeight = 0;
-                  $totalPrice = 0;
-                  foreach ($packages as $package) {
-                      $package->weight = floatval(str_replace(',', '.', $package->weight));
-                      $package->cubic_weight = floatval(str_replace(',', '.', $package->cubic_weight));
+              @php
+              $totalWeight = 0;
+              $totalCubicWeight = 0;
+              $totalPrice = 0;
+              foreach ($packages as $package) {
+              $package->weight = floatval(str_replace(',', '.', $package->weight));
+              $package->cubic_weight = floatval(str_replace(',', '.', $package->cubic_weight));
 
-                      $totalWeight += $package->weight;
-                      $totalCubicWeight += $package->cubic_weight;
-                      $totalPrice += $package->price;
-                  }
-                @endphp
-                <tfoot>
-                  <tr>
-                    <th colspan="3">Total</th>
-                    <th>{{ $totalWeight }}</th>
-                    <th colspan="3">&nbsp;</th>
-                    <th>{{ $totalCubicWeight }}</th>
-                    <th>Rp. {{ number_format($totalPrice, 0, ',', '.') }}</th>
-                  </tr>
-                </tfoot>
+              $totalWeight += $package->weight;
+              $totalCubicWeight += $package->cubic_weight;
+              $totalPrice += $package->price;
+              }
+              @endphp
+              <tfoot>
+                <tr>
+                  <th colspan="3">Total</th>
+                  <th>{{ $totalWeight }}</th>
+                  <th colspan="3">&nbsp;</th>
+                  <th>{{ $totalCubicWeight }}</th>
+                </tr>
+              </tfoot>
               @endif
             </table>
             @if (count($recipients) > 0 && count($packages) > 0)
-              <button id="btn-send-jastip" class="btn btn-primary mt-2 float-end" disabled>Simpan Data</button>
+            <button id="btn-send-jastip" class="btn btn-primary mt-2 float-end" disabled>Kirim Paket</button>
             @endif
           </div>
         </div>

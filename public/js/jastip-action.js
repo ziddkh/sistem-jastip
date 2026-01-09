@@ -7,228 +7,178 @@ const swal2 = Swal.mixin()
 $(function () {
   const createForm = $("#createForm");
   const editForm = $("#editForm");
-
   const submitButton = $("#submitButton");
 
-  const totalPriceText = $("#totalPrice");
-  const NORMAL_PRICE = 20000;
-  const CUBIC_PRICE = 15000;
+  function updateItemCount() {
+    const count = $(".package-row").length;
+    const text = `${count} Paket`;
+    $("#itemCount").text(text);
+  }
 
-  function initializeCard(card) {
-    const index = card.index();
-    const lengthGroup = card.find(`#lengthGroup-${index + 1}`);
-    const widthGroup = card.find(`#widthGroup-${index + 1}`);
-    const heightGroup = card.find(`#heightGroup-${index + 1}`);
-    const cubicWeightGroup = card.find(`#cubicWeightGroup-${index + 1}`);
-    const pricingOption = card.find(`#pricingOption-${index + 1}`);
-    let pricingOptionVal = pricingOption.val();
-    const weight = card.find(`#weight-${index + 1}`);
-    const length = card.find(`#length-${index + 1}`);
-    const width = card.find(`#width-${index + 1}`);
-    const height = card.find(`#height-${index + 1}`);
-    const cubicWeight = card.find(`#cubicWeight-${index + 1}`);
-    const pricePerPackage = card.find(`#price-${index + 1}`);
+  function initializeRow(row) {
+    const index = row.data("index");
+    const weight = row.find(`#weight-${index}`);
+    const length = row.find(`#length-${index}`);
+    const width = row.find(`#width-${index}`);
+    const height = row.find(`#height-${index}`);
+    const cubicWeight = row.find(`#cubicWeight-${index}`);
 
-    const lengthCleave = new Cleave(length, {
-      numeral: true,
-      numeralPositiveOnly: true,
-      numeralDecimalMark: ",",
-      delimiter: ".",
-    });
-
-    const widthCleave = new Cleave(width, {
-      numeral: true,
-      numeralPositiveOnly: true,
-      numeralDecimalMark: ",",
-      delimiter: ".",
-    });
-
-    const heightCleave = new Cleave(height, {
-      numeral: true,
-      numeralPositiveOnly: true,
-      numeralDecimalMark: ",",
-      delimiter: ".",
-    });
-
-    const weightCleave = new Cleave(weight, {
-      numeral: true,
-      numeralPositiveOnly: true,
-      numeralDecimalMark: ",",
-      delimiter: ".",
-    });
-
-    const cubicWeightCleave = new Cleave(cubicWeight, {
-      numeral: true,
-      numeralPositiveOnly: true,
-      numeralDecimalMark: ",",
-      delimiter: ".",
-    });
-
-    checkPricingOption();
-    pricingOption.on("change", function () {
-      const pricingOptionCurrentValue = pricingOption.val();
-      pricingOptionVal = pricingOptionCurrentValue;
-      totalPriceText.text("0");
-      pricePerPackage.val("0");
-      checkPricingOption();
-    });
-
-    function checkPricingOption() {
-      if (pricingOptionVal === "normal") {
-        lengthGroup.hide();
-        widthGroup.hide();
-        heightGroup.hide();
-        cubicWeightGroup.hide();
-        length.val("0");
-        width.val("0");
-        height.val("0");
-        cubicWeight.val("0");
-        calculateNormalPrice();
-      } else if (pricingOptionVal === "kubikasi") {
-        lengthGroup.show();
-        widthGroup.show();
-        heightGroup.show();
-        cubicWeightGroup.show();
-      }
-      calculateTotalPrice();
+    // Initialize Cleave for number formatting
+    if (weight.length && !weight.data("cleave")) {
+      const weightCleave = new Cleave(weight[0], {
+        numeral: true,
+        numeralPositiveOnly: true,
+        numeralDecimalMark: ",",
+        delimiter: ".",
+      });
+      weight.data("cleave", weightCleave);
     }
 
-    weight.on("keyup", function () {
-      if (pricingOptionVal === "normal") {
-        calculateNormalPrice();
-        calculateTotalPrice();
-      }
-    });
+    if (length.length && !length.data("cleave")) {
+      const lengthCleave = new Cleave(length[0], {
+        numeral: true,
+        numeralPositiveOnly: true,
+        numeralDecimalMark: ",",
+        delimiter: ".",
+      });
+      length.data("cleave", lengthCleave);
+    }
 
-    length.on("keyup", calculateCubicWeight);
-    width.on("keyup", calculateCubicWeight);
-    height.on("keyup", calculateCubicWeight);
+    if (width.length && !width.data("cleave")) {
+      const widthCleave = new Cleave(width[0], {
+        numeral: true,
+        numeralPositiveOnly: true,
+        numeralDecimalMark: ",",
+        delimiter: ".",
+      });
+      width.data("cleave", widthCleave);
+    }
 
-    cubicWeight.on("change", function () {
-      if (pricingOptionVal === "kubikasi") {
-        calculateCubicPrice();
-        calculateTotalPrice();
-      }
-    });
+    if (height.length && !height.data("cleave")) {
+      const heightCleave = new Cleave(height[0], {
+        numeral: true,
+        numeralPositiveOnly: true,
+        numeralDecimalMark: ",",
+        delimiter: ".",
+      });
+      height.data("cleave", heightCleave);
+    }
 
+    if (cubicWeight.length && !cubicWeight.data("cleave")) {
+      const cubicWeightCleave = new Cleave(cubicWeight[0], {
+        numeral: true,
+        numeralPositiveOnly: true,
+        numeralDecimalMark: ",",
+        delimiter: ".",
+      });
+      cubicWeight.data("cleave", cubicWeightCleave);
+    }
+
+    // Calculate cubic weight on dimension change
     function calculateCubicWeight() {
-      const totalCubicWeight =
-        (lengthCleave.getRawValue() *
-          widthCleave.getRawValue() *
-          heightCleave.getRawValue()) /
-        4000;
-      cubicWeightCleave.setRawValue(totalCubicWeight);
-
-      if (pricingOptionVal === "kubikasi") {
-        calculateCubicPrice();
-        calculateTotalPrice();
+      const l = parseFloat(length.data("cleave")?.getRawValue() || length.val() || 0);
+      const w = parseFloat(width.data("cleave")?.getRawValue() || width.val() || 0);
+      const h = parseFloat(height.data("cleave")?.getRawValue() || height.val() || 0);
+      const cubicValue = (l * w * h) / 4000;
+      
+      if (cubicWeight.data("cleave")) {
+        cubicWeight.data("cleave").setRawValue(cubicValue.toFixed(2));
+      } else {
+        cubicWeight.val(cubicValue.toFixed(2));
       }
     }
 
-    function calculateNormalPrice() {
-      const totalNormalPrice = weightCleave.getRawValue() * NORMAL_PRICE;
-      pricePerPackage.val(totalNormalPrice);
-    }
+    length.off("keyup").on("keyup", calculateCubicWeight);
+    width.off("keyup").on("keyup", calculateCubicWeight);
+    height.off("keyup").on("keyup", calculateCubicWeight);
 
-    function calculateCubicPrice() {
-      const totalCubicPrice = cubicWeightCleave.getRawValue() * CUBIC_PRICE;
-      pricePerPackage.val(totalCubicPrice);
-    }
+    // Initialize cubic weight calculation on load
+    calculateCubicWeight();
   }
 
-  const formatNumber = (number) => {
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
-
-  function calculateTotalPrice() {
-    let total = 0;
-    const cards = $(".card.package");
-    cards.each(function () {
-      const pricingOptionVal = $(this).find("select.pricing-option").val();
-      const weightCleave = new Cleave($(this).find("input.weight"), {
-        numeral: true,
-        numeralPositiveOnly: true,
-        numeralDecimalMark: ",",
-        delimiter: ".",
-      });
-      const cubicWeightCleave = new Cleave($(this).find("input.cubic-weight"), {
-        numeral: true,
-        numeralPositiveOnly: true,
-        numeralDecimalMark: ",",
-        delimiter: ".",
-      });
-      if (pricingOptionVal === "normal") {
-        total += weightCleave.getRawValue() * NORMAL_PRICE;
-      } else if (pricingOptionVal === "kubikasi") {
-        total += cubicWeightCleave.getRawValue() * CUBIC_PRICE;
-      }
-    });
-    totalPriceText.text(formatNumber(total));
-  }
-
-  const cardsWrapper = $("#cardsWrapper");
+  const packagesContainer = $("#packagesContainer");
   const addPackageButton = $("#addPackageButton");
 
   addPackageButton.on("click", function () {
-    const newCard = $(".card.package").first().clone();
-    const index = $(".card.package").length;
-    const removeButtonEl = `<button type="button" class="btn text-danger removeButton"><i class="bi bi-x-lg"></i></button>`;
-    newCard.find("input").val("");
-    newCard.find("select").val("normal");
-    newCard.find("input").each(function () {
-      const id = $(this).attr("id");
-      const newId = id.replace(/-\d+$/, `-${index + 1}`);
-      $(this).attr("id", newId);
-
-      const name = $(this).attr("name");
-      const newName = name.replace(/\d+/, `${index + 1}`);
-      $(this).attr("name", newName);
-    });
-    newCard.find("select").each(function () {
-      const id = $(this).attr("id");
-      const newId = id.replace(/-\d+$/, `-${index + 1}`);
-      $(this).attr("id", newId);
-
-      const name = $(this).attr("name");
-      const newName = name.replace(/\d+/, `${index + 1}`);
-      $(this).attr("name", newName);
-    });
-    newCard.find("label").each(function () {
-      const forAttr = $(this).attr("for");
-      const newForAttr = forAttr.replace(/-\d+$/, `-${index + 1}`);
-      $(this).attr("for", newForAttr);
-    });
-    newCard.find(".group").each(function () {
-      const id = $(this).attr("id");
-      const newId = id.replace(/-\d+$/, `-${index + 1}`);
-      $(this).attr("id", newId);
-    });
-
-    newCard.find(".card-header").append(removeButtonEl);
-
-    cardsWrapper.append(newCard);
-    initializeCard(newCard);
+    const rowCount = $(".package-row").length;
+    const newIndex = rowCount + 1;
+    
+    const newRow = `
+      <div class="package-row mb-3" data-index="${newIndex}">
+        <input type="hidden" name="packages[${newIndex}][pricing_option]" value="kubikasi">
+        <input type="hidden" name="packages[${newIndex}][price]" id="price-${newIndex}" value="0">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-md-3">
+            <div class="input-group">
+              <span class="input-group-text bg-light d-flex align-items-center justify-content-center">
+                <i class="bi bi-upc-scan"></i>
+              </span>
+              <input type="text" class="form-control" name="packages[${newIndex}][tracking_number]" 
+                placeholder="Scan Resi/Input Resi...">
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="input-group">
+              <input type="text" class="form-control weight" id="weight-${newIndex}" 
+                name="packages[${newIndex}][weight]" placeholder="0.0">
+              <span class="input-group-text bg-light">kg</span>
+            </div>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="d-flex align-items-center gap-1">
+              <input type="text" class="form-control dimension text-center" 
+                id="length-${newIndex}" name="packages[${newIndex}][length]" placeholder="P">
+              <span class="text-muted">×</span>
+              <input type="text" class="form-control dimension text-center" 
+                id="width-${newIndex}" name="packages[${newIndex}][width]" placeholder="L">
+              <span class="text-muted">×</span>
+              <input type="text" class="form-control dimension text-center" 
+                id="height-${newIndex}" name="packages[${newIndex}][height]" placeholder="T">
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="input-group">
+              <input type="text" class="form-control cubic-weight" id="cubicWeight-${newIndex}" 
+                name="packages[${newIndex}][cubic_weight]" value="0,00" readonly
+                style="background-color: #f8f9fa;">
+              <span class="input-group-text bg-light">kg</span>
+            </div>
+          </div>
+          <div class="col-12 col-md-2 d-flex align-items-center justify-content-center">
+            <button type="button" class="btn btn-sm btn-outline-danger removeButton">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    packagesContainer.append(newRow);
+    const newRowElement = packagesContainer.find(`.package-row[data-index="${newIndex}"]`);
+    initializeRow(newRowElement);
+    updateItemCount();
   });
 
-  cardsWrapper.on("click", ".removeButton", function () {
-    $(this).closest(".card.package").remove();
-    calculateTotalPrice();
+  packagesContainer.on("click", ".removeButton", function () {
+    $(this).closest(".package-row").remove();
+    updateItemCount();
   });
 
-  const cards = $(".card.package");
-  cards.each(function () {
-    initializeCard($(this));
+  // Initialize all existing rows
+  $(".package-row").each(function () {
+    initializeRow($(this));
   });
+  updateItemCount();
 
   function setLoading(isLoading) {
     if (isLoading) {
       submitButton.attr("disabled", true);
       submitButton.html(
-        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...'
       );
     } else {
       submitButton.attr("disabled", false);
-      submitButton.html("Simpan");
+      submitButton.html('<i class="bi bi-send me-1"></i> Simpan');
     }
   }
 
@@ -241,7 +191,8 @@ $(function () {
     const CREATE_URL = $(this).attr("action");
     setLoading(true);
     swal2.fire({
-      title: "Apakah yakin untuk menyimpan data?",
+      title: "Simpan data jastip?",
+      text: "Pastikan semua data sudah benar",
       icon: "question",
       showCancelButton: true,
       cancelButtonText: "Batal",
@@ -254,10 +205,11 @@ $(function () {
           setLoading(false);
           if (success) {
             swal2.fire({
-              title: res.data.message,
+              title: "Berhasil!",
+              text: res.data.message,
               icon: "success",
               showCancelButton: true,
-              cancelButtonText: "Tambah Jastip",
+              cancelButtonText: "Tambah Jastip Lagi",
               confirmButtonText: "Lihat Daftar Jastip",
             }).then((result) => {
               if (result.isConfirmed) {
@@ -268,9 +220,9 @@ $(function () {
             });
           } else {
             if (res.status === 422) {
-              showToast("Isi Data Dengan Benar");
+              showToast("Lengkapi semua data yang diperlukan");
             } else {
-              showToast("Gagal Untuk Menambahkan Data");
+              showToast("Gagal menyimpan data");
             }
           }
         });
@@ -290,7 +242,8 @@ $(function () {
     const EDIT_URL = $(this).attr("action");
     setLoading(true);
     swal2.fire({
-      title: "Apakah yakin untuk merubah data?",
+      title: "Simpan perubahan?",
+      text: "Pastikan semua data sudah benar",
       icon: "question",
       showCancelButton: true,
       cancelButtonText: "Batal",
@@ -303,7 +256,8 @@ $(function () {
           setLoading(false);
           if (success) {
             swal2.fire({
-              title: res.data.message,
+              title: "Berhasil!",
+              text: res.data.message,
               icon: "success",
               showCancelButton: true,
               cancelButtonText: "Tambah Jastip Baru",
@@ -317,9 +271,9 @@ $(function () {
             });
           } else {
             if (res.status === 422) {
-              showToast("Isi Data Dengan Benar");
+              showToast("Lengkapi semua data yang diperlukan");
             } else {
-              showToast("Gagal Untuk Mengubah Data");
+              showToast("Gagal menyimpan perubahan");
             }
           }
         });
@@ -330,16 +284,15 @@ $(function () {
   });
 });
 
+// Handle keyboard navigation
 $(document).on("keydown", "input, select", function(e) {
-  console.log(e.which)
   if (e.which === 13 || e.which === 9) {
     e.preventDefault();
-    const $submitBtn = $("button[type=submit]");
     const $canfocus = $(
       'input:not([readonly]):not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
+    );
     const index = $canfocus.index(this) + 1;
     if (index >= $canfocus.length) $canfocus[0].focus();
-    else  $canfocus[index].focus();
+    else $canfocus[index].focus();
   }
 });

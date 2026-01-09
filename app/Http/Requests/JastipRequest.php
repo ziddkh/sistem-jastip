@@ -26,12 +26,11 @@ class JastipRequest extends FormRequest
             "packages" => "required|array",
             "packages.*" => "required|array",
             "packages.*.tracking_number" => "required|string",
-            "packages.*.pricing_option" => "in:normal,kubikasi",
             "packages.*.weight" => "required|string",
-            "packages.*.length" => "required_if:packages.*.pricing_option,kubikasi|string",
-            "packages.*.width" => "required_if:packages.*.pricing_option,kubikasi|string",
-            "packages.*.height" => "required_if:packages.*.pricing_option,kubikasi|string",
-            "packages.*.cubic_weight" => "required_if:packages.*.pricing_option,kubikasi|string",
+            "packages.*.length" => "required|string",
+            "packages.*.width" => "required|string",
+            "packages.*.height" => "required|string",
+            "packages.*.cubic_weight" => "required|string",
         ];
     }
 }

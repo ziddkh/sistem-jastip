@@ -26,6 +26,9 @@
                 </div>
                 <div class="col-md-12 mt-4">
                   <button type="submit" id="button-submit-jastip-date" class="btn btn-sm btn-primary" disabled>Cari Jastip</button>
+                  <button type="button" id="button-export-pdf" class="btn btn-sm btn-danger" disabled>
+                    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                  </button>
                 </div>
               </div>
             </div>
@@ -37,10 +40,14 @@
     </div>
   </x-page-heading>
   <x-slot:script>
+    <script id="placeholder-template" type="text/template">
+      @include('pages.report-jastip._placeholder')
+    </script>
     <script>
-      const PLACEHOLDER_ELEMENT = `@include('pages.report-jastip._placeholder')`;
-      const REPORT_JASTIP_URL = `{{ route('laporan-jastip.getReportData') }}`
-  </script>
-  <script type="module" src="{{ asset('js/report-jastip.js') }}"></script>
+      const PLACEHOLDER_ELEMENT = document.getElementById('placeholder-template').innerHTML;
+      const REPORT_JASTIP_URL = '{{ route("laporan-jastip.getReportData") }}';
+      const EXPORT_PDF_URL = '{{ route("laporan-jastip.exportReportPdf") }}';
+    </script>
+    <script type="module" src="{{ asset('js/report-jastip.js') }}"></script>
   </x-slot:script>
 </x-app>

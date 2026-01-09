@@ -13,7 +13,6 @@
         <th>L</th>
         <th>T</th>
         <th>KGVOL</th>
-        <th>Harga</th>
       </thead>
       <tbody>
         @if (count($packages) > 0)
@@ -27,15 +26,13 @@
 
                 $totalWeight += $package->weight;
                 $totalCubicWeight += $package->cubic_weight;
-                $totalPrice += $package->price;
             }
           @endphp
           <tr>
-            <th colspan="3">Total</th>
+            <th colspan="3" class="text-center">Total</th>
             <th>{{ $totalWeight }}</th>
             <th colspan="3">&nbsp;</th>
             <th>{{ $totalCubicWeight }}</th>
-            <th>Rp. {{ number_format($totalPrice, 0, ',', '.') }}</th>
           </tr>
           @foreach ($packages as $package)
           <tr>
@@ -47,14 +44,12 @@
               <td>{{ $package->width }}</td>
               <td>{{ $package->height }}</td>
               <td>{{ $package->cubic_weight }}</td>
-              <td>Rp. {{ number_format($package->price, 0, ',', '.') }}</td>
           @endforeach
           <tr>
-            <th colspan="3">Total</th>
+            <th colspan="3" class="text-center">Total</th>
             <th>{{ $totalWeight }}</th>
             <th colspan="3">&nbsp;</th>
             <th>{{ $totalCubicWeight }}</th>
-            <th>Rp. {{ number_format($totalPrice, 0, ',', '.') }}</th>
           </tr>
         @else
           <tr>

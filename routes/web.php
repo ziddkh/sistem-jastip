@@ -19,10 +19,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('home.index');
+  return view('home.index');
 });
 
-Route::controller(PricingOptionController::class)->group(function() {
+Route::controller(PricingOptionController::class)->group(function () {
   Route::get('jenis-harga', 'index')->name('jenis-harga.index');
   Route::post('jenis-harga', 'store')->name('jenis-harga.store');
   Route::get('jenis-harga/get-data', 'getPricingOptions')->name('jenis-harga.getData');
@@ -30,7 +30,7 @@ Route::controller(PricingOptionController::class)->group(function() {
   Route::delete('jenis-harga/destroy/{pricing_option}', 'destroy')->name('jenis-harga.destroy');
 });
 
-Route::controller(StatusController::class)->group(function() {
+Route::controller(StatusController::class)->group(function () {
   Route::get('status', 'index')->name('status.index');
   Route::post('status', 'store')->name('status.store');
   Route::get('status/get-data', 'getStatuses')->name('status.getData');
@@ -40,16 +40,18 @@ Route::controller(StatusController::class)->group(function() {
 
 Route::get('jastip/get-data', [JastipController::class, 'getJastip'])->name('jastip.getData');
 Route::get('jastip/get-data/{id}', [JastipController::class, 'getJastipById'])->name('jastip.getDataById');
-Route::controller(PackagesController::class)->group(function() {
+Route::controller(PackagesController::class)->group(function () {
   Route::get('jastip/diterima', 'index')->name('jastip.received');
   Route::post('jastip/simpan-laporan', 'store')->name('jastip.saveJastipReport');
 });
 
 Route::resource('jastip', JastipController::class);
 
-Route::prefix('laporan-jastip')->controller(ReportJastipController::class)->group(function() {
+Route::prefix('laporan-jastip')->controller(ReportJastipController::class)->group(function () {
   Route::get('/', 'index')->name('laporan-jastip.index');
   Route::get('harian', 'daily')->name('laporan-jastip.daily');
   Route::get('get-daily-data', 'getDailyReportJastip')->name('laporan-jastip.getDailyData');
   Route::post('get-report-data', 'getReportJastip')->name('laporan-jastip.getReportData');
+  Route::get('export-daily-pdf', 'exportDailyPdf')->name('laporan-jastip.exportDailyPdf');
+  Route::post('export-report-pdf', 'exportReportPdf')->name('laporan-jastip.exportReportPdf');
 });
